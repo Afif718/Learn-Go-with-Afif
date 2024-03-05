@@ -1,12 +1,40 @@
 package main
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"os"
+)
 
 func main () {
 
-	funcRevenue := getRevenue("Enter Revenue: ")
-	funcExpense := getExpense("Enter Expense: ")
-	funcTax := getTax("Enter Tax-rate: ")
+	funcRevenue, errRev := getRevenue("Enter Revenue: ")
+
+	if(errRev != nil){
+		fmt.Println(errRev)
+		return
+	}
+
+
+	funcExpense, errExp := getExpense("Enter Expense: ")
+
+	if(errExp != nil){
+		fmt.Println(errExp)
+		return
+	}
+
+	funcTax, errTax := getTax("Enter Tax-rate: ")
+
+	if(errTax != nil){
+		fmt.Println(errTax)
+		return
+	}
+
+	
+	// if(errRev != nil || errExp != nil || errTax != nil){
+	// 	fmt.Println(errTax)
+	// 	return
+	// }
 
 	fmt.Println("Revenue: ", funcRevenue)
 
@@ -21,33 +49,49 @@ func main () {
 Profit Value: %0.1f
 Ratio Value: %0.1f`, ebtVal, profitVal, ratioVal)
 
+
+		//pass data to the function and write into the file
+	writeResults(ebtVal, profitVal, ratioVal)
+
 }
 
-func getRevenue(revMessage string) float64{
+func getRevenue(revMessage string) (float64, error){
 	var revenue float64
 
 	fmt.Print(revMessage)
 	fmt.Scan(&revenue)
 
-	return revenue 
+	if(revenue <= 0){
+		return 0, errors.New("revenue must be grater than 0")
+	}
+
+	return revenue, nil
 }
 
-func getExpense(expenseMessage string) float64{
+func getExpense(expenseMessage string) (float64, error){
 	var expense float64
 
 	fmt.Print(expenseMessage)
 	fmt.Scan(&expense)
 
-	return expense 
+	if(expense <= 0){
+		return 0, errors.New("expense must be grater than 0")
+	}
+
+	return expense, nil 
 }
 
-func getTax(taxMessage string) float64{
+func getTax(taxMessage string) (float64, error){
 	var taxRate float64
 
 	fmt.Print(taxMessage)
 	fmt.Scan(&taxRate)
 
-	return taxRate 
+	if(taxRate <= 0){
+		return 0, errors.New("taxRate must be grater than 0")
+	}
+
+	return taxRate, nil 
 }
 
 func calculate (revenue float64, expense float64, taxRate float64) (float64, float64, float64 ){
@@ -56,4 +100,10 @@ func calculate (revenue float64, expense float64, taxRate float64) (float64, flo
 	ratio := ebt/profit
 
 	return ebt, profit, ratio
+}
+
+func writeResults(ebt, profit, ratio float64) {
+
+	results := fmt.Sprintf("EBT : %.1f\nProfit : %.1f\nRatio : %.1f\n", ebt, profit, ratio)
+	os.WriteFile("result.txt", []byte(results), 0644)
 }
